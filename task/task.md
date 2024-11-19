@@ -8,9 +8,12 @@
 
 ```mermaid
 flowchart LR
-scheduled{Can the task be scheduled?}
-started{Does the task start successfully?}
-stopped{Does the task stop successfully?}
+scheduled{Can the task
+be scheduled?}
+started{Does the task
+start successfully?}
+stopped{Does the task
+stop successfully?}
 
 P(Pending) --> scheduled
 scheduled -- Yes --> S(Scheduled)
