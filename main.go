@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"time"
 
+	"github.com/docker/docker/client"
 	"github.com/golang-collections/collections/queue"
 	"github.com/google/uuid"
 	"github.com/ximura/corg/manager"
@@ -64,4 +67,63 @@ func main() {
 	}
 
 	fmt.Printf("node %+v\n", n)
+
+	fmt.Println("create a test container")
+	dockerTask, result := createContainer()
+	if result.Error != nil {
+		fmt.Printf("%v", result.Error)
+		return
+	}
+
+	time.Sleep(time.Second * 5)
+	fmt.Printf("stopping container %s\n", result.ContanerId)
+	r := stopContainer(dockerTask, result.ContanerId)
+	if r.Error != nil {
+		fmt.Printf("%v", result.Error)
+		return
+	}
+}
+
+func createContainer() (*task.Docker, *task.DockerResult) {
+	c := task.Config{
+		Name:  "test-container-1",
+		Image: "postgres:13",
+		Env: []string{
+			"POSTGRES_USER=cube",
+			"POSTGRES_PASSWORD=secret",
+		},
+	}
+
+	dc, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		log.Println("Failed to create docker client")
+		return nil, &task.DockerResult{
+			Error: err,
+		}
+	}
+
+	d := task.Docker{
+		Client: dc,
+		Config: c,
+	}
+
+	result := d.Run()
+	if result.Error != nil {
+		fmt.Printf("Run: %v\n", result.Error)
+		return nil, nil
+	}
+
+	fmt.Printf("Container %s is running with config %v\n", result.ContanerId, c)
+	return &d, &result
+}
+
+func stopContainer(d *task.Docker, id string) *task.DockerResult {
+	result := d.Stop(id)
+	if result.Error != nil {
+		fmt.Printf("%v\n", result.Error)
+		return nil
+	}
+
+	fmt.Printf("Container %s has been stopped and removed\n", result.ContanerId)
+	return &result
 }

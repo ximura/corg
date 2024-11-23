@@ -17,6 +17,15 @@ const (
 	Failed
 )
 
+type RestartPolicyMode string
+
+const (
+	RestartPolicyDisabled      RestartPolicyMode = "no"
+	RestartPolicyAlways        RestartPolicyMode = "always"
+	RestartPolicyOnFailure     RestartPolicyMode = "on-failure"
+	RestartPolicyUnlessStopped RestartPolicyMode = "unless-stopped"
+)
+
 // Task - orchestrator task description
 type Task struct {
 	ID            uuid.UUID
@@ -37,4 +46,21 @@ type TaskEvent struct {
 	State     State
 	Timestamp time.Time
 	Task      Task
+}
+
+// Config - configuration for orchestration tasks
+
+type Config struct {
+	Name          string
+	AttachStdin   bool
+	AttachStdout  bool
+	AttachStdErr  bool
+	ExposedPorts  nat.PortSet
+	Cmd           []string
+	Image         string
+	Cpu           float64
+	Memory        int64
+	Disk          int64
+	Env           []string
+	RestartPolicy RestartPolicyMode
 }
