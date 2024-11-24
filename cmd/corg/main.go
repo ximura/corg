@@ -24,15 +24,15 @@ func main() {
 	defer d.Close()
 
 	fmt.Println("create a test container")
-	contanerId, err := createContainer(ctx, d)
+	contanerID, err := createContainer(ctx, d)
 	if err != nil {
 		fmt.Printf("%v", err)
 		return
 	}
 
 	time.Sleep(time.Second * 5)
-	fmt.Printf("stopping container %s\n", contanerId)
-	if err := stopContainer(ctx, d, contanerId); err != nil {
+	fmt.Printf("stopping container %s\n", contanerID)
+	if err := stopContainer(ctx, d, contanerID); err != nil {
 		fmt.Printf("%v", err)
 		return
 	}
@@ -89,7 +89,7 @@ func printTest() {
 	w := worker.Worker{
 		Name:  "worker-1",
 		Queue: *queue.New(),
-		Db:    make(map[uuid.UUID]*task.Task),
+		DB:    make(map[uuid.UUID]*task.Task),
 	}
 	fmt.Printf("worker %+v\n", w)
 	w.CollectStats()
@@ -99,8 +99,8 @@ func printTest() {
 
 	m := manager.Manager{
 		Pending: *queue.New(),
-		TaskDb:  make(map[string][]*task.Task),
-		EventDb: make(map[string][]*task.TaskEvent),
+		TaskDB:  make(map[string][]*task.Task),
+		EventDB: make(map[string][]*task.TaskEvent),
 		Workers: []string{w.Name},
 	}
 
@@ -111,7 +111,7 @@ func printTest() {
 
 	n := node.Node{
 		Name:   "node-1",
-		Ip:     "192.168.1.1",
+		IP:     "192.168.1.1",
 		Cores:  4,
 		Memory: 1024,
 		Disk:   25,

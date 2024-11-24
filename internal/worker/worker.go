@@ -8,10 +8,11 @@ import (
 	"github.com/ximura/corg/internal/task"
 )
 
+// Worker - responsible for performing work in form of Tasks
 type Worker struct {
 	Name      string
 	Queue     queue.Queue
-	Db        map[uuid.UUID]*task.Task
+	DB        map[uuid.UUID]*task.Task
 	TaskCount int
 }
 

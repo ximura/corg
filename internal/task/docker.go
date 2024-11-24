@@ -17,7 +17,7 @@ import (
 type DockerResult struct {
 	Error      error
 	Action     string
-	ContanerId string
+	ContanerID string
 	Result     string
 }
 
@@ -50,7 +50,7 @@ func (d *Docker) Run(ctx context.Context, config Config) (string, error) {
 
 	r := container.Resources{
 		Memory:   config.Memory,
-		NanoCPUs: int64(config.Cpu * math.Pow(10, 9)),
+		NanoCPUs: int64(config.CPU * math.Pow(10, 9)),
 	}
 
 	cc := container.Config{

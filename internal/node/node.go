@@ -13,7 +13,7 @@ const (
 // * Workers
 type Node struct {
 	Name            string
-	Ip              string
+	IP              string
 	Cores           int
 	Memory          int
 	MemoryAllocated int

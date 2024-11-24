@@ -58,7 +58,7 @@ type Config struct {
 	ExposedPorts  nat.PortSet
 	Cmd           []string
 	Image         string
-	Cpu           float64
+	CPU           float64
 	Memory        int64
 	Disk          int64
 	Env           []string
