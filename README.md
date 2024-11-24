@@ -1,5 +1,9 @@
-Simplified orhestrator model
+# Corg
+Corg is an orchestrator written in Golang for education propose.
+It based on Tim Boring book [Build an Orchestrator in Go (From Scratch)](https://www.manning.com/books/build-an-orchestrator-in-go-from-scratch)
 
+
+## Simplified orhestrator model
 ```mermaid
 flowchart
 	task(Task1)
