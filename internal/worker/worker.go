@@ -5,7 +5,7 @@ import (
 
 	"github.com/golang-collections/collections/queue"
 	"github.com/google/uuid"
-	"github.com/ximura/corg/task"
+	"github.com/ximura/corg/internal/task"
 )
 
 type Worker struct {
