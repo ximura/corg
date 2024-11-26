@@ -25,3 +25,12 @@ R --> stopped
 stopped -- Yes --> c(Completed)
 stopped -- Yes --> F
 ```
+
+##  Transition table
+| CurrentState |    Event      | NextState |
+|--------------|:-------------:|----------:|
+| Pending      | ScheduleEvent | Scheduled |
+| Pending      | ScheduleEvent | Failed    |
+| Scheduled    | StartTask     | Running   |
+| Scheduled    | StartTask     | Failed    |
+| Running      | StopTask      | Completed |

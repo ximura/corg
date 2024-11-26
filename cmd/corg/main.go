@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"sync"
 	"time"
 
 	"github.com/golang-collections/collections/queue"
@@ -18,24 +18,81 @@ func main() {
 	ctx := context.Background()
 	d, err := task.NewDocker()
 	if err != nil {
-		log.Printf("Failed to create docker client %v", err)
+		fmt.Printf("Failed to create docker client %v", err)
 		return
+	}
+	defer d.Close()
+
+	workers := []worker.Worker{
+		createWorker(d), createWorker(d), createWorker(d),
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(3)
+	for i, w := range workers {
+		go func() {
+			defer wg.Done()
+			t := task.Task{
+				ID:    uuid.New(),
+				Name:  fmt.Sprintf("test-container-%d", i),
+				State: task.Scheduled,
+				Image: "strm/helloworld-http",
+			}
+
+			fmt.Printf("starting task %s\n", t.ID)
+			w.AddTask(t)
+			containerID, err := w.RunTask(ctx)
+			if err != nil {
+				fmt.Printf("Failed to run task %s. %v\n", t.ID, err)
+				return
+			}
+
+			t.ContainerID = containerID
+			fmt.Printf("task %s is running in container %s\n", t.ID, t.ContainerID)
+			fmt.Println("Sleepy time")
+			time.Sleep(30 * time.Second)
+
+			fmt.Printf("stopping task %s\n", t.ID)
+			t.State = task.Completed
+			w.AddTask(t)
+			if _, err := w.RunTask(ctx); err != nil {
+				fmt.Printf("Failed to run task %s. %v\n", t.ID, err)
+				return
+			}
+		}()
+	}
+
+	wg.Wait()
+}
+
+func createWorker(d *task.Docker) worker.Worker {
+	return worker.Worker{
+		Queue:  *queue.New(),
+		DB:     make(map[uuid.UUID]*task.Task),
+		Docker: d,
+	}
+}
+
+func testTask() error {
+	ctx := context.Background()
+	d, err := task.NewDocker()
+	if err != nil {
+		return fmt.Errorf("Failed to create docker client %v", err)
 	}
 	defer d.Close()
 
 	fmt.Println("create a test container")
 	contanerID, err := createContainer(ctx, d)
 	if err != nil {
-		fmt.Printf("%v", err)
-		return
+		return err
 	}
 
 	time.Sleep(time.Second * 5)
 	fmt.Printf("stopping container %s\n", contanerID)
 	if err := stopContainer(ctx, d, contanerID); err != nil {
-		fmt.Printf("%v", err)
-		return
+		return err
 	}
+	return nil
 }
 
 func createContainer(ctx context.Context, d *task.Docker) (string, error) {
@@ -67,7 +124,7 @@ func stopContainer(ctx context.Context, d *task.Docker, id string) error {
 	return nil
 }
 
-func printTest() {
+func printTest(ctx context.Context) {
 	t := task.Task{
 		ID:     uuid.New(),
 		Name:   "task-1",
@@ -93,9 +150,9 @@ func printTest() {
 	}
 	fmt.Printf("worker %+v\n", w)
 	w.CollectStats()
-	w.RunTask()
-	w.StartTask()
-	w.StopTask()
+	w.RunTask(ctx)
+	w.StartTask(ctx, t)
+	w.StopTask(ctx, t)
 
 	m := manager.Manager{
 		Pending: *queue.New(),
